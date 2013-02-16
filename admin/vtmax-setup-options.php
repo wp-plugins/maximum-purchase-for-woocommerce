@@ -269,7 +269,7 @@ function vtmax_setup_options_cntl() {
         <h3><?php esc_attr_e('Maximum Purchase Rules Repair and Delete Buttons', 'vtmax'); ?></h3> 
         <h4><?php esc_attr_e('Repair reknits the Rules Custom Post Type with the Maximum Purchase rules option array, if out of sync.', 'vtmax'); ?></h4>        
         <input id="repair-button"       name="vtmax_setup_options[rules-repair]"  type="submit" class="button-fourth"     value="<?php esc_attr_e('Repair Rules Structures', 'vtmax'); ?>" /> 
-        <h4><?php esc_attr_e('Nuke Rules deletes all Maximum Purchase Rules, Setup Options.  Hit "Reset Options" to create new options.', 'vtmax'); ?></h4>
+        <h4><?php esc_attr_e('Nuke Rules deletes all Maximum Purchase Rules.', 'vtmax'); ?></h4>
         <input id="nuke-rules-button"   name="vtmax_setup_options[rules-nuke]"     type="submit" class="button-third"      value="<?php esc_attr_e('Nuke all Rules', 'vtmax'); ?>" />
         <h4><?php esc_attr_e('Nuke Rule Cats deletes all Maximum Purchase Rule Categories', 'vtmax'); ?></h4>
         <input id="nuke-cats-button"    name="vtmax_setup_options[cats-nuke]"      type="submit" class="button-fifth"      value="<?php esc_attr_e('Nuke all Rule Cats', 'vtmax'); ?>" />
@@ -1099,21 +1099,30 @@ function vtmax_validate_setup_input( $input ) {
     case $repair       === true :    //repair rules
         $vtmax_nuke = new VTMAX_Rule_delete;            
         $vtmax_nuke->vtmax_repair_all_rules();
+        $output = get_option( 'vtmax_setup_options' );  //fix 2-13-2013 - initialize output, otherwise all Options go away...
       break;
     case $nuke_rules   === true :
         $vtmax_nuke = new VTMAX_Rule_delete;            
         $vtmax_nuke->vtmax_nuke_all_rules();
+        $output = get_option( 'vtmax_setup_options' );  //fix 2-13-2013 - initialize output, otherwise all Options go away...
       break;
     case $nuke_cats    === true :    
         $vtmax_nuke = new VTMAX_Rule_delete;            
         $vtmax_nuke->vtmax_nuke_all_rule_cats();
+        $output = get_option( 'vtmax_setup_options' );  //fix 2-13-2013 - initialize output, otherwise all Options go away...
       break;
     case $nuke_hist    === true :    
         $vtmax_nuke = new VTMAX_Rule_delete;            
         $vtmax_nuke->vtmax_nuke_max_purchase_history();
+        $output = get_option( 'vtmax_setup_options' );  //fix 2-13-2013 - initialize output, otherwise all Options go away...
       break;
     default:   //standard update button hit...                 
-        
+        $output = array();
+      	foreach( $input as $key => $value ) {
+      		if( isset( $input[$key] ) ) {
+      			$output[$key] = strip_tags( stripslashes( $input[ $key ] ) );	
+      		} // end if		
+      	} // end foreach        
       break;
   }
    
@@ -1165,15 +1174,7 @@ function vtmax_validate_setup_input( $input ) {
            <br> "Show Error Messages Just Before Checkout Address List - HTML Selector" must be filled in.', 'vtmax');
         add_settings_error( 'VTMAX Options', 'Show Error Messages', $admin_errorMsg , 'error' );  
      } 
-    
-   //options always edit/update, except for reset which exits earlier...
 
-    $output = array();
-  	foreach( $input as $key => $value ) {
-  		if( isset( $input[$key] ) ) {
-  			$output[$key] = strip_tags( stripslashes( $input[ $key ] ) );	
-  		} // end if		
-  	} // end foreach
  
   //NO Object-based code on the apply_filters statement needed or wanted!!!!!!!!!!!!!
   return apply_filters( 'vtmax_validate_setup_input', $output, $input );                       

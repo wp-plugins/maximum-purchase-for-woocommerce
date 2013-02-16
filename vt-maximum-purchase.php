@@ -3,13 +3,18 @@
 Plugin Name: VarkTech Maximum Purchase for WooCommerce
 Plugin URI: http://varktech.com
 Description: An e-commerce add-on for WooCommerce, supplying maximum purchase functionality.
-Version: 1.0
+Version: 1.05
 Author: Vark
 Author URI: http://varktech.com
 */
 
 /*
 == Changelog ==
+
+= 1.05 - 2013-02-13 =
+* Bug Fix - Rule Add screen was being overwritten by some other plugins' global metaboxes - thanks to Dagofee for debug help
+* Bug Fix - PHP version check not being executed correctly on activation hook (minimum PHP version 5 required)
+* Bug Fix - Nuke and Repair buttons on Options screen were also affecting main Options settings, now fixed
  
 = 1.0  - 2013-01-15
 * Initial Public Release
@@ -31,13 +36,16 @@ class VTMAX_Controller{
 	
 	public function __construct(){    
    
-		define('VTMAX_VERSION',                               '1.0');
-    define('VTMAX_LAST_UPDATE_DATE',                      '2013-01-15');
+		define('VTMAX_VERSION',                               '1.05');
+    define('VTMAX_LAST_UPDATE_DATE',                      '2013-02-13');
     define('VTMAX_DIRNAME',                               ( dirname( __FILE__ ) ));
     define('VTMAX_URL',                                   plugins_url( '', __FILE__ ) );
     define('VTMAX_EARLIEST_ALLOWED_WP_VERSION',           '3.3');   //To pick up wp_get_object_terms fix, which is required for vtmax-parent-functions.php
     define('VTMAX_EARLIEST_ALLOWED_PHP_VERSION',          '5');
     define('VTMAX_PLUGIN_SLUG',                           plugin_basename(__FILE__));
+    
+
+    
     
     require ( VTMAX_DIRNAME . '/woo-integration/vtmax-parent-definitions.php');
    
@@ -72,10 +80,8 @@ class VTMAX_Controller{
     require ( VTMAX_DIRNAME . '/woo-integration/vtmax-parent-cart-validation.php');
     
     if (is_admin()){
-        register_activation_hook(__FILE__, array( $this, 'vtmax_activation_hook'));   
-        register_uninstall_hook (__FILE__, array(&$this, 'vtmax_uninstall_hook'));
-        
         require ( VTMAX_DIRNAME . '/admin/vtmax-setup-options.php');
+        //fix 02-13-2013 - register_activation_hook now at bottom of file, after class instantiates
         
         if(defined('VTMAX_PRO_DIRNAME')) {
           require ( VTMAX_PRO_DIRNAME . '/admin/vtmax-rules-ui.php' );
@@ -273,26 +279,34 @@ class VTMAX_Controller{
 			return;
 		}
     
-		if((float)phpversion() < 5){
-			// delete_option('vtmax_setup_options');
-			 wp_die( __('<strong>Looks like you\'re running an older version of PHP, you need to be running at least PHP 5 to use the Varktech Maximum Purchase plugin.  Contact your host to upgrade to PHP 5.</strong>', 'vtmax'), __('VT Maximum Purchase not compatible - PHP', 'vtmax'), array('back_link' => true));
-			return;
+           
+    //fix 2-13-2013 - changed php version_compare, altered error msg   
+   if (version_compare(PHP_VERSION, VTMAX_EARLIEST_ALLOWED_PHP_VERSION) < 0) {    //'<0' = 1st value is lower 
+			wp_die( __('<strong><em>PLUGIN CANNOT ACTIVATE &nbsp;&nbsp;-&nbsp;&nbsp;     Varktech Maximum Purchase </em>
+      <br><br>&nbsp;&nbsp;&nbsp;&nbsp;   Your installation is running on an older version of PHP 
+      <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   - your PHP version = ', 'vtmax') .PHP_VERSION. __(' . 
+      <br><br>&nbsp;&nbsp;&nbsp;&nbsp;   You need to be running **at least PHP version 5** to use this plugin.  
+      <br><br>&nbsp;&nbsp;&nbsp;&nbsp;   Please contact your host and request an upgrade to PHP 5+ . 
+      <br><br>&nbsp;&nbsp;&nbsp;&nbsp;   Then activate this plugin following the upgrade.</strong>', 'vtmax'), __('VT Min and Max Purchase not compatible - PHP', 'vtmax'), array('back_link' => true));
+			return; 
 		}
     
-    if(defined('WPSC_VERSION') && (VTMAX_PARENT_PLUGIN_NAME == 'WooCommerce') ) { 
+       
+    if(defined('WPSC_VERSION') && (VTMAX_PARENT_PLUGIN_NAME == 'WP E-Commerce') ) { 
       $new_version =      VTMAX_EARLIEST_ALLOWED_PARENT_VERSION;
       $current_version =  WPSC_VERSION;
       if( (version_compare(strval($new_version), strval($current_version), '>') == 1) ) {   //'==1' = 2nd value is lower 
   			// delete_option('vtmax_setup_options');
-  			 wp_die( __('<strong>Looks like you\'re running an older version of WooCommerce. <br>You need to be running at least ** WooCommerce 3.8 **, to use the Varktech Maximum Purchase plugin.</strong>', 'vtmax'), __('VT Maximum Purchase not compatible - WPEC', 'vtmax'), array('back_link' => true));
+  			 wp_die( __('<strong>Looks like you\'re running an older version of WP E-Commerce. <br>You need to be running at least ** WP E-Commerce 3.8 **, to use the Varktech Maximum Purchase plugin.</strong>', 'vtmax'), __('VT Maximum Purchase not compatible - WPEC', 'vtmax'), array('back_link' => true));
   			return;
   		}
     }  else 
-    if (VTMAX_PARENT_PLUGIN_NAME == 'WooCommerce') {
-        wp_die( __('<strong>Varktech Maximum Purchase for WooCommerce requires that WooCommerce be installed and activated.</strong>', 'vtmax'), __('WooCommerce not installed or activated', 'vtmax'), array('back_link' => true));
+    if (VTMAX_PARENT_PLUGIN_NAME == 'WP E-Commerce') {
+        wp_die( __('<strong>Varktech Maximum Purchase for WP E-Commerce requires that WP E-Commerce be installed and activated.</strong>', 'vtmax'), __('WP E-Commerce not installed or activated', 'vtmax'), array('back_link' => true));
   			return;
     }
     
+  
 
     if(defined('WOOCOMMERCE_VERSION') && (VTMAX_PARENT_PLUGIN_NAME == 'WooCommerce')) { 
       $new_version =      VTMAX_EARLIEST_ALLOWED_PARENT_VERSION;
@@ -344,3 +358,12 @@ class VTMAX_Controller{
   
 } //end class
 $vtmax_controller = new VTMAX_Controller;
+
+  //***************************************************************************************
+  //fix 2-13-2013  -  problems with activation hook and class, solved herewith...
+  //   FROM http://website-in-a-weekend.net/tag/register_activation_hook/
+  //***************************************************************************************
+  if (is_admin()){ 
+        register_activation_hook(__FILE__, array($vtmax_controller, 'vtmax_activation_hook'));
+        register_activation_hook(__FILE__, array($vtmax_controller, 'vtmax_uninstall_hook'));                                   
+  }
