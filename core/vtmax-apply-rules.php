@@ -8,10 +8,8 @@ class VTMAX_Apply_Rules{
     
     $vtmax_rules_set = get_option( 'vtmax_rules_set' );
 
-    $vtmax_parent_functions = new VTMAX_Parent_Functions;
-    
     // create a new vtmax_cart intermediary area, load with parent cart values.  results in global $vtmax_cart.
-    $vtmax_parent_functions->vtmax_load_vtmax_cart_for_processing(); 
+    vtmax_load_vtmax_cart_for_processing(); 
     
     $this->vtmax_maximum_purchase_check();
 	}
@@ -28,10 +26,11 @@ class VTMAX_Apply_Rules{
     /*  Analyze each rule, and load up any cart products found into the relevant rule
         fill rule array with product cart data :: load inpop info 
     */  
-    $sizeOf_vtmax_rules_set = sizeof($vtmax_rules_set);
+    $sizeof_vtmax_rules_set = sizeof($vtmax_rules_set);
+    $sizeof_cart_items = sizeof($vtmax_cart->cart_items);
      
-    for($i=0; $i < $sizeOf_vtmax_rules_set; $i++) {                                                               
-      if ( $vtmax_rules_set[$i]->rule_status == 'publish' ) {       
+    for($i=0; $i < $sizeof_vtmax_rules_set; $i++) {                                                               
+      if ( $vtmax_rules_set[$i]->rule_status == 'publish' ) {            
         for($k=0; $k < sizeof($vtmax_cart->cart_items); $k++) {                 
             switch( $vtmax_rules_set[$i]->inpop_selection ) {  
               case 'groups':
@@ -55,7 +54,7 @@ class VTMAX_Apply_Rules{
     /*  Analyze each Rule population, and see if they satisfy the rule
     *     identify and label each rule as requiring action = yes/no
     */
-    for($i=0; $i < $sizeOf_vtmax_rules_set; $i++) {         
+    for($i=0; $i < $sizeof_vtmax_rules_set; $i++) {         
         if ( $vtmax_rules_set[$i]->rule_status == 'publish' ) {  
           
           if ( sizeof($vtmax_rules_set[$i]->inpop_found_list) == 0 ) {
@@ -63,7 +62,7 @@ class VTMAX_Apply_Rules{
           } else {
             
             $vtmax_rules_set[$i]->rule_requires_cart_action = 'pending';
-            $sizeOf_inpop_found_list = sizeof($vtmax_rules_set[$i]->inpop_found_list);
+            $sizeof_inpop_found_list = sizeof($vtmax_rules_set[$i]->inpop_found_list);
             /*
                 AS only one product can be found with 'single', override to 'all' speeds things along
             */
@@ -87,13 +86,13 @@ class VTMAX_Apply_Rules{
                         }
                     } 
                     if ($vtmax_rules_set[$i]->rule_requires_cart_action == 'yes') {
-                       for($k=0; $k < $sizeOf_inpop_found_list; $k++) {
+                       for($k=0; $k < $sizeof_inpop_found_list; $k++) {
                           $this->vtmax_mark_product_as_requiring_cart_action($i,$k);                          
                        }
                     }  		
               		break;
                case 'each': //$specChoice_value = 'each' => apply the rule to each product individually across all products found         		
-              		  for($k=0; $k < $sizeOf_inpop_found_list; $k++) {
+              		  for($k=0; $k < $sizeof_inpop_found_list; $k++) {
                         if ($vtmax_rules_set[$i]->amtSelected_selection == 'currency'){   //price total
                             if ($vtmax_rules_set[$i]->inpop_found_list[$k]['prod_total_price'] <= $vtmax_rules_set[$i]->maximum_amt['value']){
                                $vtmax_rules_set[$i]->inpop_found_list[$k]['prod_requires_action'] = 'no';
@@ -113,7 +112,7 @@ class VTMAX_Apply_Rules{
                case 'any':  //$specChoice_value = 'any'  =>   "You may buy a maximum of $10 for each of any of 2 products from this group."       		
               		  //Version 1.01 completely replaced the original case logic
                     $any_action_cnt = 0;
-                    for($k=0; $k < $sizeOf_inpop_found_list; $k++) {
+                    for($k=0; $k < $sizeof_inpop_found_list; $k++) {
                         if ($vtmax_rules_set[$i]->amtSelected_selection == 'currency'){   //price total
                             if ($vtmax_rules_set[$i]->inpop_found_list[$k]['prod_total_price'] <= $vtmax_rules_set[$i]->maximum_amt['value']){
                                $vtmax_rules_set[$i]->inpop_found_list[$k]['prod_requires_action'] = 'no';
@@ -131,7 +130,7 @@ class VTMAX_Apply_Rules{
                         }
                         //if 'any' limit reached, end the loop, don't mark any mor products as requiring cart action
                         if ($any_action_cnt >= $vtmax_rules_set[$i]->anyChoice_max['value']) {
-                            $k = $sizeOf_inpop_found_list;   
+                            $k = $sizeof_inpop_found_list;   
                         }
                     }                  
                   break;
@@ -144,7 +143,8 @@ class VTMAX_Apply_Rules{
     //   IF WE DON'T DO "apply multiple rules to product", rollout the multples   
     //****************************************************************************
     if ($vtmax_setup_options[apply_multiple_rules_to_product] == 'no' )  {
-      for($k=0; $k < sizeof($vtmax_cart->cart_items); $k++) {             //$k = 'cart item'
+      $sizeof_cart_items = sizeof($vtmax_cart->cart_items);
+      for($k=0; $k < $sizeof_cart_items; $k++) {             //$k = 'cart item'
          if ( sizeof($vtmax_cart->cart_items[$k]->product_participates_in_rule) > 1 ) {  
             //*****************************
             //remove product from **2ND** TO NTH rule, roll quantity and price out of totals for that rule
@@ -189,7 +189,7 @@ class VTMAX_Apply_Rules{
      *           the info is held in the global namespace.                                   
     */
     $vtmax_info['error_message_needed'] = 'no';
-    for($i=0; $i < $sizeOf_vtmax_rules_set; $i++) {               
+    for($i=0; $i < $sizeof_vtmax_rules_set; $i++) {               
         if ( $vtmax_rules_set[$i]->rule_status == 'publish' ) {    
             switch( true ) {            
               case ($vtmax_rules_set[$i]->rule_requires_cart_action == 'no'):
@@ -241,7 +241,8 @@ class VTMAX_Apply_Rules{
                     } 
                     
                     //PROCESS all ERROR products
-                    for($k=0; $k < sizeof($vtmax_rules_set[$i]->inpop_found_list); $k++) {
+                    $sizeof_inpop_found_list = sizeof($vtmax_rules_set[$i]->inpop_found_list);
+                    for($k=0; $k < $sizeof_inpop_found_list; $k++) {
                       if ($vtmax_rules_set[$i]->inpop_found_list[$k]['prod_requires_action'] == 'yes'){
                         //aggregate totals and add name into list
                         $vtmax_rules_set[$i]->errProds_qty         += $vtmax_rules_set[$i]->inpop_found_list[$k]['prod_qty'];
@@ -309,12 +310,32 @@ class VTMAX_Apply_Rules{
       
       $message = __('<span id="table-error-messages">', 'vtmax');
       
-      for($i=0; $i < sizeof($vtmax_rules_set); $i++) {               
+      $sizeof_rules_set = sizeof($vtmax_rules_set);
+      
+      
+      for($i=0; $i < $sizeof_rules_set; $i++) {               
         if ( $vtmax_rules_set[$i]->rule_requires_cart_action == 'yes' ) { 
+          //v1.07 begin
+          if ( $vtmax_rules_set[$i]->custMsg_text > ' ') { //custom msg override              
+              /*
+              ==>> text error msg function always executed, so msg already loaded there - don't load here
+              $vtmax_cart->error_messages[] = array (
+                'msg_from_this_rule_id' => $vtmax_rules_set[$i]->post_id, 
+                'msg_from_this_rule_occurrence' => $i, 
+                'msg_text'  => $vtmax_rules_set[$i]->custMsg_text,
+                'msg_is_custom'   => 'yes' 
+              );
+              $this->vtmax_set_custom_msgs_status ('customMsg');
+              */
+              continue;
+           }           
+          //v1.07 end        
+        
           switch ( $vtmax_rules_set[$i]->specChoice_in_selection ) {
             case  'all' :
                  $vtmax_info['action_cnt'] = 0;
-                 for($k=0; $k < sizeof($vtmax_rules_set[$i]->inpop_found_list); $k++) { 
+                 $sizeof_inpop_found_list = sizeof($vtmax_rules_set[$i]->inpop_found_list);
+                 for($k=0; $k < $sizeof_inpop_found_list; $k++) { 
                     if ($vtmax_rules_set[$i]->inpop_found_list[$k]['prod_requires_action'] == 'yes'){
                        $vtmax_info['action_cnt']++;
                     }
@@ -357,7 +378,13 @@ class VTMAX_Apply_Rules{
       //close up owning span
       $message .= __('</span>', 'vtmax'); //end "table-error-messages"
       
-      $vtmax_cart->error_messages[] = array ('msg_from_this_rule_id' => $rule_id_list, 'msg_from_this_rule_occurrence' => '', 'msg_text'  => $message );       
+      $vtmax_cart->error_messages[] = array (
+        'msg_from_this_rule_id' => $rule_id_list, 
+        'msg_from_this_rule_occurrence' => '', 
+        'msg_text'  => $message,
+        'msg_is_custom'   => 'no'    //v1.07 
+      );       
+      $this->vtmax_set_custom_msgs_status ('standardMsg');     //v1.07       
       
   } 
   
@@ -368,14 +395,15 @@ class VTMAX_Apply_Rules{
       
       $message_details = $this->vtmax_table_titles();
       
+      $sizeof_inpop_found_list = sizeof($vtmax_rules_set[$i]->inpop_found_list);
       //Version 1.01  new IF structure  replaced straight 'for' loop
       if ( $vtmax_rules_set[$i]->specChoice_in_selection == 'all' ) {
-         for($r=0; $r < sizeof($vtmax_rules_set[$i]->inpop_found_list); $r++) { 
+         for($r=0; $r < $sizeof_inpop_found_list; $r++) { 
             $k = $vtmax_rules_set[$i]->inpop_found_list[$r]['prod_id_cart_occurrence'];
             $message_details .= $this->vtmax_table_line ($i, $k);  
           }
       } else {    // each or any
-        for($r=0; $r < sizeof($vtmax_rules_set[$i]->inpop_found_list); $r++) { 
+        for($r=0; $r < $sizeof_inpop_found_list; $r++) { 
             if ($vtmax_rules_set[$i]->inpop_found_list[$r]['prod_requires_action'] == 'yes'){
               $k = $vtmax_rules_set[$i]->inpop_found_list[$r]['prod_id_cart_occurrence'];
               $message_details .= $this->vtmax_table_line ($i, $k);
@@ -417,7 +445,7 @@ class VTMAX_Apply_Rules{
      $message_line .= __('</span>', 'vtmax'); //end "quantity" end "color-grp"
      
      $message_line .= __('<span class="price-column">', 'vtmax');
-     $message_line .= $this->vtmax_format_money_element($vtmax_cart->cart_items[$k]->unit_price);
+     $message_line .= vtmax_format_money_element($vtmax_cart->cart_items[$k]->unit_price);
      //$message_line .= $vtmax_cart->cart_items[$k]->unit_price;
      $message_line .= __('</span>', 'vtmax'); //end "price"
      
@@ -432,7 +460,7 @@ class VTMAX_Apply_Rules{
         $message_line .= __('<span class="total-column">', 'vtmax');   
       }
      //$message_line .= $vtmax_cart->cart_items[$k]->total_price;
-     $message_line .= $this->vtmax_format_money_element($vtmax_cart->cart_items[$k]->total_price);
+     $message_line .= vtmax_format_money_element($vtmax_cart->cart_items[$k]->total_price);
      if ( ($vtmax_rules_set[$i]->amtSelected_selection == 'currency') && ($vtmax_info['bold_the_error_amt_on_detail_line'] == 'yes') ) {
        $message_line .= __(' &nbsp;(Error)', 'vtmax');
      }     
@@ -480,7 +508,7 @@ class VTMAX_Apply_Rules{
         $message_totals .= $vtmax_info['cart_color_cnt'];
         $message_totals .= __('">(', 'vtmax');
         //grp total price
-        $message_totals .= $this->vtmax_format_money_element($vtmax_info['cart_grp_info']['price']);
+        $message_totals .= vtmax_format_money_element($vtmax_info['cart_grp_info']['price']);
         $message_totals .= __(') Error', 'vtmax'); 
       } else {
         $message_totals .= __('<span class="quantity-column">', 'vtmax');
@@ -513,51 +541,15 @@ class VTMAX_Apply_Rules{
                                            'price'    => 0
                                           );
    }
-   
+/* v1.07   
    public function vtmax_format_money_element($money) { 
      global $vtmax_setup_options; 
            
      $formatted = sprintf("%01.2f", $money); //yields 2places filled right of the dec
-     $formatted = $this->vtmax_get_currency_symbol( $vtmax_setup_options['use_this_currency_sign'] ) . $formatted;
+     $formatted = VTMAX_PARENT_PLUGIN_CURRENCY_SYMBOL . $formatted;      //mwntSYM
      return $formatted;
    }
-   
-   public function vtmax_get_currency_symbol( $currency ) {
-    	$currency_symbol = '';
-    	switch ($currency) {
-    		case 'BRL' : $currency_symbol = '&#82;&#36;'; break;
-    		case 'AUD' : $currency_symbol = '&#36;'; break;
-    		case 'CAD' : $currency_symbol = '&#36;'; break;
-    		case 'MXN' : $currency_symbol = '&#36;'; break;
-    		case 'NZD' : $currency_symbol = '&#36;'; break;
-    		case 'HKD' : $currency_symbol = '&#36;'; break;
-    		case 'SGD' : $currency_symbol = '&#36;'; break;
-    		case 'USD' : $currency_symbol = '&#36;'; break;
-    		case 'EUR' : $currency_symbol = '&euro;'; break;
-    		case 'CNY' : $currency_symbol = '&yen;'; break;
-    		case 'RMB' : $currency_symbol = '&yen;'; break;
-    		case 'JPY' : $currency_symbol = '&yen;'; break;
-    		case 'TRY' : $currency_symbol = '&#84;&#76;'; break;
-    		case 'NOK' : $currency_symbol = '&#107;&#114;'; break;
-    		case 'ZAR' : $currency_symbol = '&#82;'; break;
-    		case 'CZK' : $currency_symbol = '&#75;&#269;'; break;
-    		case 'MYR' : $currency_symbol = '&#82;&#77;'; break;
-    		case 'DKK' : $currency_symbol = '&#107;&#114;'; break;
-    		case 'HUF' : $currency_symbol = '&#70;&#116;'; break;
-    		case 'ILS' : $currency_symbol = '&#8362;'; break;
-    		case 'PHP' : $currency_symbol = '&#8369;'; break;
-    		case 'PLN' : $currency_symbol = '&#122;&#322;'; break;
-    		case 'SEK' : $currency_symbol = '&#107;&#114;'; break;
-    		case 'CHF' : $currency_symbol = '&#67;&#72;&#70;'; break;
-    		case 'TWD' : $currency_symbol = '&#78;&#84;&#36;'; break;
-    		case 'THB' : $currency_symbol = '&#3647;'; break;
-    		case 'GBP' : $currency_symbol = '&pound;'; break;
-    		case 'RON' : $currency_symbol = 'lei'; break;
-    		default    : $currency_symbol = ''; break;
-    	}
-    	return $currency_symbol;
-  } 
-           
+*/          
    public function vtmax_table_text_line ($i){
       global $vtmax_setup_options, $vtmax_cart, $vtmax_rules_set, $vtmax_rule, $vtmax_info;
       
@@ -588,7 +580,7 @@ class VTMAX_Apply_Rules{
       $message_text .= __('">', 'vtmax');
       
       if ($vtmax_rules_set[$i]->amtSelected_selection == 'currency') {
-        $message_text .= $this->vtmax_format_money_element($vtmax_rules_set[$i]->maximum_amt['value']);
+        $message_text .= vtmax_format_money_element($vtmax_rules_set[$i]->maximum_amt['value']);
         $message_text .= __('</span> allowed ', 'vtmax');     //if branch end "color-grp"
       } else {
         $message_text .= $vtmax_rules_set[$i]->maximum_amt['value']; 
@@ -691,6 +683,19 @@ class VTMAX_Apply_Rules{
      global $vtmax_setup_options, $vtmax_cart, $vtmax_rules_set, $vtmax_rule, $vtmax_info; 
      
      $vtmax_rules_set[$i]->rule_requires_cart_action = 'yes';
+          
+      //v1.07 begin
+      if ( $vtmax_rules_set[$i]->custMsg_text > ' ') { //custom msg override              
+          $vtmax_cart->error_messages[] = array (
+            'msg_from_this_rule_id' => $vtmax_rules_set[$i]->post_id, 
+            'msg_from_this_rule_occurrence' => $i, 
+            'msg_text'  => $vtmax_rules_set[$i]->custMsg_text,
+            'msg_is_custom'   => 'yes' 
+          );
+          $this->vtmax_set_custom_msgs_status('customMsg'); 
+          return;
+       }           
+      //v1.07 end 
    
      if  ( $vtmax_setup_options['show_error_messages_in_table_form'] == 'yes' ) {
         $vtmax_info['error_message_needed'] = 'yes';
@@ -757,7 +762,7 @@ class VTMAX_Apply_Rules{
         //SHOW TARGET MIN $/QTY AND CURRENTLY REACHED TOTAL
         if ($vtmax_rules_set[$i]->amtSelected_selection == 'currency')   {
           $message .= __('<br /><span class="errmsg-text">A maximum of &nbsp;<span class="errmsg-amt-required"> ', 'vtmax'); 
-          $message .= $this->vtmax_format_money_element( $vtmax_rules_set[$i]->maximum_amt['value'] );
+          $message .= vtmax_format_money_element( $vtmax_rules_set[$i]->maximum_amt['value'] );
           switch( $vtmax_rules_set[$i]->specChoice_in_selection ) {
             case 'all': 
                 $message .= __('</span> &nbsp;for the total group may be purchased.  The current total ', 'vtmax');
@@ -770,7 +775,7 @@ class VTMAX_Apply_Rules{
               break;
 
           }
-          $message .= $this->vtmax_format_money_element( $vtmax_rules_set[$i]->errProds_total_price );
+          $message .= vtmax_format_money_element( $vtmax_rules_set[$i]->errProds_total_price );
           $message .= __(' </span></span> ', 'vtmax');
 
           
@@ -817,8 +822,14 @@ class VTMAX_Apply_Rules{
         }
                 
         //queue the message to go back to the screen     
-        $vtmax_cart->error_messages[] = array ('msg_from_this_rule_id' => $vtmax_rules_set[$i]->post_id,  'msg_from_this_rule_occurrence' => $i, 'msg_text'  => $message ); 
-        
+        $vtmax_cart->error_messages[] = array (
+            'msg_from_this_rule_id' => $vtmax_rules_set[$i]->post_id,  
+            'msg_from_this_rule_occurrence' => $i, 
+            'msg_text'  => $message,
+            'msg_is_custom'   => 'no'    //v1.07 
+          );         
+        $this->vtmax_set_custom_msgs_status ('standardMsg');     //v1.07  
+             
       }  //end text message formatting
     
       if ( $vtmax_setup_options['debugging_mode_on'] == 'yes' ){   
@@ -833,6 +844,37 @@ class VTMAX_Apply_Rules{
   } 
       
       
+   //*************************************  
+   //v1.07 new function 
+   //*************************************    
+   public function vtmax_set_custom_msgs_status ($message_state) { 
+      global $vtmax_cart;
+      switch( $vtmax_cart->error_messages_are_custom ) {  
+        case 'all':
+             if ($message_state == 'standardMsg') {
+                $vtmax_cart->error_messages_are_custom = 'some';
+             }
+          break;
+        case 'some':
+          break;          
+        case 'none':
+             if ($message_state == 'customMsg') {
+                $vtmax_cart->error_messages_are_custom = 'some';
+             }
+          break; 
+        default:  //no state set yet
+             if ($message_state == 'standardMsg') {
+                $vtmax_cart->error_messages_are_custom = 'none';
+             } else {
+                $vtmax_cart->error_messages_are_custom = 'all';
+             }
+          break;                    
+      }
+
+      return;
+   }      
+   //v1.07 end
+  
         
    public function vtmax_product_is_in_inpop_group ($i, $k) { 
       global $vtmax_cart, $vtmax_rules_set, $vtmax_rule, $vtmax_info, $vtmax_setup_options;

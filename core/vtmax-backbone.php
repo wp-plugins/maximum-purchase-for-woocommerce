@@ -70,8 +70,8 @@ class VTMAX_Backbone{
 		)
 	);
  
-	$role = get_role( 'administrator' );
-	$role->add_cap( 'read_vtmax-rule' );
+//	$role = get_role( 'administrator' );      v1.07 removed for conflict
+//	$role->add_cap( 'read_vtmax-rule' );      v1.07 removed for conflict
 }
 
   public function vtmax_add_dummy_rule_category () {

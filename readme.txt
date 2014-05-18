@@ -3,8 +3,8 @@ Contributors: vark
 Donate link: http://www.varktech.com/woocommerce/maximum-purchase-for-woocommerce/
 Tags: e-commerce, WooCommerce, shop, store, admin, price, pricing, maximum, purchase, limits, checkout
 Requires at least: 3.3
-Tested up to: 3.9
-Stable tag: 1.06
+Tested up to: 3.9.1
+Stable tag: 1.07
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,7 +18,11 @@ The Maximum Purchase plugin for WooCommerce gives you the ability to set up maxi
 
 If a purchase in your store fails a maximum purchase rule, an error message appears at the top of the checkout page, identifying the error situation and rule requirements.  The customer must resolve the error, before the purchase can be completed.   
 
-Fully tested with WooCommerce 2.0 .
+Fully tested with WooCommerce 2.1+ .
+
+
+= Now with Custom Messaging! =
+You can enter your own Custom Minimum Purchase Messages by Rule 
 
 
 = Introductory Video =
@@ -143,6 +147,14 @@ Please review the following printed and video documentation.
 
 == Changelog ==
 
+= 1.07 - 2014-05-16 =
+* Fix - change add_error to add_notice.
+* Enhancement - Custom Messaging! Overrides default messaging for rule.
+* Fix - New rule add - stutter removed
+* Enhancement - change currency sign and currency formatting to follow parent plugin, removed setting from this plugin
+* Fix - Https issue resolved
+* Fix - Warnings damped  
+
 = 1.06 - 2013-02-23 =
 * Bug Fix - "unexpected T_CLASS/T_PUBLIC" - File admin/vtmXX-rules-ui.php was corrupted, but the corruption only showed up on some hosts (?!).  Huge thanks to Don for allowing full access to his installation to debug.   
 
@@ -155,6 +167,14 @@ Please review the following printed and video documentation.
 * Initial Public Release
 
 == Upgrade Notice ==
+
+= 1.07 - 2014-05-16 =
+* Fix - change add_error to add_notice.
+* Enhancement - Custom Messaging! Overrides default messaging for rule.
+* Fix - New rule add - stutter removed
+* Enhancement - change currency sign and currency formatting to follow parent plugin, removed setting from this plugin
+* Fix - Https issue resolved
+* Fix - Warnings damped  
 
 = 1.0 - 2013-01-15 =
 * Initial Public Release

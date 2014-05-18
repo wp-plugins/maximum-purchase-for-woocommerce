@@ -3,26 +3,11 @@
 Plugin Name: VarkTech Maximum Purchase for WooCommerce
 Plugin URI: http://varktech.com
 Description: An e-commerce add-on for WooCommerce, supplying maximum purchase functionality.
-Version: 1.06
+Version: 1.07
 Author: Vark
 Author URI: http://varktech.com
 */
 
-/*
-== Changelog ==
-
-= 1.06 - 2013-02-23 =
-* Bug Fix - "unexpected T_CLASS" - File admin/vtmin-rules-ui.php was corrupted, but the corruption only showed up on some hosts (?!).  Huge thanks to Don for allowing full access to his installation to debug.   
-
-= 1.05 - 2013-02-13 =
-* Bug Fix - Rule Add screen was being overwritten by some other plugins' global metaboxes - thanks to Dagofee for debug help
-* Bug Fix - PHP version check not being executed correctly on activation hook (minimum PHP version 5 required)
-* Bug Fix - Nuke and Repair buttons on Options screen were also affecting main Options settings, now fixed
- 
-= 1.0  - 2013-01-15
-* Initial Public Release
-
-*/
 
 /*
 ** define Globals 
@@ -39,8 +24,8 @@ class VTMAX_Controller{
 	
 	public function __construct(){    
    
-		define('VTMAX_VERSION',                               '1.06');
-    define('VTMAX_LAST_UPDATE_DATE',                      '2013-02-23');
+		define('VTMAX_VERSION',                               '1.07');
+    define('VTMAX_LAST_UPDATE_DATE',                      '2014-05-16');
     define('VTMAX_DIRNAME',                               ( dirname( __FILE__ ) ));
     define('VTMAX_URL',                                   plugins_url( '', __FILE__ ) );
     define('VTMAX_EARLIEST_ALLOWED_WP_VERSION',           '3.3');   //To pick up wp_get_object_terms fix, which is required for vtmax-parent-functions.php
@@ -57,6 +42,14 @@ class VTMAX_Controller{
     /*  =============+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
     add_action('init',          array( &$this, 'vtmax_controller_init' )); 
     add_action('admin_init',    array( &$this, 'vtmax_admin_init' ));
+    
+    //v1.07 begin
+    add_action( 'draft_to_publish',       array( &$this, 'vtmax_admin_update_rule' )); 
+    add_action( 'auto-draft_to_publish',  array( &$this, 'vtmax_admin_update_rule' ));
+    add_action( 'new_to_publish',         array( &$this, 'vtmax_admin_update_rule' )); 			
+    add_action( 'pending_to_publish',     array( &$this, 'vtmax_admin_update_rule' ));    
+    //v1.07 end
+        
     add_action('save_post',     array( &$this, 'vtmax_admin_update_rule' ));
     add_action('delete_post',   array( &$this, 'vtmax_admin_delete_rule' ));    
     add_action('trash_post',    array( &$this, 'vtmax_admin_trash_rule' ));
@@ -81,7 +74,13 @@ class VTMAX_Controller{
     require ( VTMAX_DIRNAME . '/core/vtmax-rules-classes.php');
     require ( VTMAX_DIRNAME . '/woo-integration/vtmax-parent-functions.php');
     require ( VTMAX_DIRNAME . '/woo-integration/vtmax-parent-cart-validation.php');
-    
+
+    //moved here v1.07
+    if (get_option( 'vtmax_setup_options' ) ) {
+      $vtmax_setup_options = get_option( 'vtmax_setup_options' );  //put the setup_options into the global namespace
+    }        
+    vtmax_debug_options();  //v1.07
+            
     if (is_admin()){
         require ( VTMAX_DIRNAME . '/admin/vtmax-setup-options.php');
         //fix 02-13-2013 - register_activation_hook now at bottom of file, after class instantiates
@@ -109,9 +108,6 @@ class VTMAX_Controller{
     }
     
     wp_enqueue_script('jquery'); 
-    if (get_option( 'vtmax_setup_options' ) ) {
-      $vtmax_setup_options = get_option( 'vtmax_setup_options' );  //put the setup_options into the global namespace
-    }
 
   }
   

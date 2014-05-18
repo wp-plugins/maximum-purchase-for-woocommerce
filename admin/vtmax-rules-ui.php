@@ -69,12 +69,13 @@ class VTMAX_Rules_UI {
       if ($post->ID > ' ' ) {
         $post_id =  $post->ID;
         $vtmax_rules_set   = get_option( 'vtmax_rules_set' ) ;
-        for($i=0; $i < sizeof($vtmax_rules_set); $i++) { 
+        $sizeof_rules_set = sizeof($vtmax_rules_set);
+        for($i=0; $i < $sizeof_rules_set; $i++) { 
            if ($vtmax_rules_set[$i]->post_id == $post_id) {
               $vtmax_rule = $vtmax_rules_set[$i];  //load vtmax-rule               
               $found_rule = true;
               $found_rule_index = $i; 
-              $i =  sizeof($vtmax_rules_set);
+              $i =  $sizeof_rules_set;
            }
         }
       } 
@@ -99,6 +100,7 @@ class VTMAX_Rules_UI {
       add_meta_box('vtmax-pop-in-select', __('Cart Search Criteria', 'vtmax'), array(&$this, 'vtmax_pop_in_select'), 'vtmax-rule', 'normal', 'high');                      
       add_meta_box('vtmax-pop-in-specifics', __('Rule Application Method', 'vtmax'), array(&$this, 'vtmax_pop_in_specifics'), 'vtmax-rule', 'normal', 'high');
       add_meta_box('vtmax-rule-amount', __('Quantity or Price Maximum Amount', 'vtmax'), array(&$this, 'vtmax_rule_amount'), 'vtmax-rule', 'normal', 'high');
+      add_meta_box('vtmax-rule-custom-message', __('Custom Message', 'vtmax'), array(&$this, 'vtmax_rule_custom_message'), 'vtmax-rule', 'normal', 'default');  //v1.07
       add_meta_box('vtmax-rule-id', __('Maximum Purchase Rule ID', 'vtmax'), array(&$this, 'vtmax_rule_id'), 'vtmax-rule', 'side', 'low'); //low = below Publish box
       add_meta_box('vtmax-rule-resources', __('Resources', 'vtmax'), array(&$this, 'vtmax_rule_resources'), 'vtmax-rule', 'side', 'low'); //low = below Publish box 
             
@@ -167,7 +169,9 @@ class VTMAX_Rules_UI {
         </style>
                    
         <input type="hidden" id="vtmax_nonce" name="vtmax_nonce" value="<?php echo $vtmaxNonce; ?>" />
-                            
+        
+        <input type="hidden" id="fullMsg" name="fullMsg" value="<?php echo $vtmax_info['default_full_msg'];?>" />  <?php //v1.07  ?>
+            
         <div class="column1" id="inpopDescrip">
             <h4> <?php _e('Choose how to look at the Candidate Population', 'vtmax') ?></h4>
             <p> <?php _e('Maximum Amount rules will only look at the contents of the cart at checkout.
@@ -188,7 +192,8 @@ class VTMAX_Rules_UI {
           <h3><?php _e('Select Search Type', 'vtmax')?></h3>
           <div id="inpopRadio">
           <?php
-           for($i=0; $i < sizeof($vtmax_rule->inpop); $i++) { 
+           $sizeof_rule_inpop = sizeof($vtmax_rule->inpop);
+           for($i=0; $i < $sizeof_rule_inpop; $i++) { 
            ?>                 
               
               <input id="<?php echo $vtmax_rule->inpop[$i]['id']; ?>" class="<?php echo $vtmax_rule->inpop[$i]['class']; ?>" type="<?php echo $vtmax_rule->inpop[$i]['type']; ?>" name="<?php echo $vtmax_rule->inpop[$i]['name']; ?>" value="<?php echo $vtmax_rule->inpop[$i]['value']; ?>" <?php if ( $vtmax_rule->inpop[$i]['user_input'] > ' ' ) { echo $checked; } else { echo $disabled; } ?> /><span id="<?php echo $vtmax_rule->inpop[$i]['id'] . '-label'; ?>"> <?php echo $vtmax_rule->inpop[$i]['label']; ?></span><br />
@@ -263,8 +268,7 @@ class VTMAX_Rules_UI {
               <div id="inpopVarButton">
                  <?php
                     $product_ID = $vtmax_rule->inpop_varProdID['value'];
-                    $vtmax_parent_functions = new VTMAX_Parent_Functions; 
-                    $product_variation_IDs = $vtmax_parent_functions->vtmax_get_variations_list($product_ID);
+                    $product_variation_IDs = vtmax_get_variations_list($product_ID);
                     /* ************************************************
                     **   Get Variations Button for Rule screen
                     *     ==>>> get the product id from $_REQUEST['varProdID'];  in the receiving ajax routine. 
@@ -553,7 +557,27 @@ class VTMAX_Rules_UI {
       <?php
   } 
   
-                                                                            
+   
+   //V1.07 NEW FUNCTION 
+   //Custom Message overriding default messaging                                                                        
+    public    function vtmax_rule_custom_message() {
+        global $post, $vtmax_info, $vtmax_rule, $vtmax_rules_set;                   
+          ?>
+        <div class="rule_message clear-left" id="cust-msg-text-area">
+           <span class="newColumn1" id=cust-msg-text-label-area>
+              <h3><?php _e('Custom Message Text', 'vtmax')?></h3>
+              <span id='cust-msg-optional'>(optional)</span>
+              <span class="clear-left" id='cust-msg-comment'>(overrides default message)</span>
+           </span>   
+            <textarea name="cust-msg-text" type="text" class="msg-text newColumn2" id="cust-msg-text" cols="50" rows="2"><?php echo $vtmax_rule->custMsg_text; ?></textarea>          
+       </div>
+
+      <?php
+  }  
+  //v1.07 end
+      
+
+        
     public    function vtmax_rule_id( ) {
         global $post;           
         echo '<span id="vtmax-rule-postid">' . $post->ID . '</span>';
@@ -607,8 +631,7 @@ source: http://www.ilovecolors.com.ar/avoid-hierarchical-taxonomies-to-loose-hie
                   $vtmax_checkbox_classes->vtmax_fill_roles_checklist($tax_class, $checked_list);
                 break;
               case 'variations':                  
-                  $vtmax_parent_functions = new VTMAX_Parent_Functions;
-                  $vtmax_parent_functions->vtmax_fill_variations_checklist($tax_class, $checked_list, $product_ID, $product_variation_IDs);                            
+                  vtmax_fill_variations_checklist($tax_class, $checked_list, $product_ID, $product_variation_IDs);                            
                 break;
               default:  //product category or vtmax category...
                   $this->vtmax_build_checkbox_contents ($taxonomy, $tax_class, $checked_list);                             

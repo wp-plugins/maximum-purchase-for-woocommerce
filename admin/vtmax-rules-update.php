@@ -114,7 +114,14 @@ class VTMAX_Rule_update {
             $vtmax_rule->maxRule_typeSelected[1]['user_input'] = $selected;
           break;
      }
-      
+
+     //v1.07 begin
+     $vtmax_rule->custMsg_text = $_REQUEST['cust-msg-text'];
+     global $vtmax_info; 
+     if ( $vtmax_rule->custMsg_text == $vtmax_info['default_full_msg']) {
+        $vtmax_rule->custMsg_text = '';   //re-initialize if default msg still there...
+     }   
+     //v1.07 end       
     //*****************************************
     //  If errors were found, the error message array will be displayed by the UI on next screen send.
     //*****************************************
@@ -132,10 +139,11 @@ class VTMAX_Rule_update {
           
     if ($rules_set_found) {
       $rule_found = false;
-      for($i=0; $i < sizeof($vtmax_rules_set); $i++) { 
+      $sizeof_rules_set = sizeof($vtmax_rules_set);
+      for($i=0; $i < $sizeof_rules_set; $i++) { 
          if ($vtmax_rules_set[$i]->post_id == $post_id) {
             $vtmax_rules_set[$i] = $vtmax_rule;
-            $i =  sizeof($vtmax_rules_set);
+            $i =  $sizeof_rules_set;
             $rule_found = true; 
          }
       }

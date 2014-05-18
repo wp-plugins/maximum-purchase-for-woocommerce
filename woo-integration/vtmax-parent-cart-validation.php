@@ -24,7 +24,7 @@ class VTMAX_Parent_Cart_Validation {
     $vtmax_info['woo_pay_url']       =  $this->vtmax_woo_get_url('pay');   
     $vtmax_info['currPageURL']       =  $this->vtmax_currPageURL();
       
-    if ( in_array($vtmax_info['currPageURL'], array($vtmax_info['woo_cart_url'],$vtmax_info['woo_checkout_url'], $vtmax_info['woo_pay_url'] ) ) )  {      
+    if ( in_array($vtmax_info['currPageURL'], array( $vtmax_info['woo_cart_url'],$vtmax_info['woo_checkout_url'], $vtmax_info['woo_pay_url'] ) ) )  {      
        add_action( 'init', array(&$this, 'vtmax_woo_apply_checkout_cntl'),99 );                                                            
     }  
      /*   Priority of 99 in the action above, to delay add_action execution. The
@@ -67,27 +67,81 @@ class VTMAX_Parent_Cart_Validation {
   *************************************************** */
 	public function vtmax_woo_apply_checkout_cntl(){
     global $vtmax_cart, $vtmax_cart_item, $vtmax_rules_set, $vtmax_rule, $vtmax_info, $woocommerce;
+    vtmax_debug_options();  //v1.07
         
     //input and output to the apply_rules routine in the global variables.
     //    results are put into $vtmax_cart
-    
+    /*v1.07 cart not there yet...
     if ( $vtmax_cart->error_messages_processed == 'yes' ) {  
-      $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmax') );  //supplies an error msg and prevents payment from completing 
+      wc_add_notice( __('Maximum Purchase error found.', 'vtmin'), $notice_type = 'error' );   //supplies an error msg and prevents payment from completing   v1.07      
       return;
     }
+    */
     
      $vtmax_apply_rules = new VTMAX_Apply_Rules;   
     
     //ERROR Message Path
     if ( sizeof($vtmax_cart->error_messages) > 0 ) {      
-      //insert error messages into checkout page
-      add_action( "wp_enqueue_scripts", array($this, 'vtmax_enqueue_error_msg_css') );
-      add_action('wp_head', array(&$this, 'vtmax_display_rule_error_msg_at_checkout') );  //JS to insert error msgs   
-      $vtmax_cart->error_messages_processed = 'yes';
-      $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmax') );  //supplies an error msg and prevents payment from completing  
+      
+      //v1.07 changes begin
+        switch( $vtmax_cart->error_messages_are_custom ) {  
+          case 'all':
+               $this->vtmax_display_custom_messages();
+            break;
+          case 'some':    
+               $this->vtmax_display_custom_messages();
+               $this->vtmax_display_standard_messages();
+            break;           
+          default:  //'none' / no state set yet
+               $this->vtmax_display_standard_messages();
+              $current_version =  WOOCOMMERCE_VERSION;
+              if( (version_compare(strval('2.1.0'), strval($current_version), '>') == 1) ) {   //'==1' = 2nd value is lower     
+                $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmin') );  //supplies an error msg and prevents payment from completing 
+              } else {
+               //added in woo 2.1
+                wc_add_notice( __('Maximum Purchase error found.', 'vtmin'), $notice_type = 'error' );   //supplies an error msg and prevents payment from completing   v1.07
+              }             
+            break;                    
+        }
+
+      //v1.07 changes end 
     }     
   }
-      
+
+  /* ************************************************
+  **   v1.07 New Function
+  *************************************************** */
+  public function vtmax_display_standard_messages() {
+    global $vtmax_cart, $vtmax_cart_item, $vtmax_rules_set, $vtmax_rule, $vtmax_info, $woocommerce;
+    //insert error messages into checkout page
+    add_action( "wp_enqueue_scripts", array($this, 'vtmax_enqueue_error_msg_css') );
+    add_action('wp_head', array(&$this, 'vtmax_display_rule_error_msg_at_checkout') );  //JS to insert error msgs 
+    $vtmax_cart->error_messages_processed = 'yes';
+  } 
+
+  /* ************************************************
+  **   v1.07 New Function
+  *************************************************** */
+  public function vtmax_display_custom_messages() {
+    global $vtmax_cart, $vtmax_cart_item, $vtmax_rules_set, $vtmax_rule, $vtmax_info, $woocommerce;
+    
+    for($i=0; $i < sizeof($vtmax_cart->error_messages); $i++) { 
+       if ($vtmax_cart->error_messages[$i]['msg_is_custom'] == 'yes') {  //v1.08 ==>> show custom messages here...
+          
+              //v1.07 begin
+              $current_version =  WOOCOMMERCE_VERSION;
+              if( (version_compare(strval('2.1.0'), strval($current_version), '>') == 1) ) {   //'==1' = 2nd value is lower     
+                $woocommerce->add_error(  $vtmax_cart->error_messages[$i]['msg_text'] );  //supplies an error msg and prevents payment from completing 
+              } else {
+               //added in woo 2.1
+                wc_add_notice( $vtmax_cart->error_messages[$i]['msg_text'], $notice_type = 'error' );
+              } 
+              //v1.07 end               
+       } //end if
+    }  //end 'for' loop    
+  }   
+  
+        
            
   /* ************************************************
   **   Application - Apply Rules at Woo E-Commerce  ==> AT Place Order Time <==
@@ -98,11 +152,13 @@ class VTMAX_Parent_Cart_Validation {
     //input and output to the apply_rules routine in the global variables.
     //    results are put into $vtmax_cart
     
+    /*  v1.07 $vtmax_cart not there yet!
     if ( $vtmax_cart->error_messages_processed == 'yes' ) {  
-      $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmax') );  //supplies an error msg and prevents payment from completing 
+      wc_add_notice( __('Maximum Purchase error found.', 'vtmin'), $notice_type = 'error' );   //supplies an error msg and prevents payment from completing   v1.07
       return;
     }
-    
+    */
+     vtmax_debug_options();  //v1.07    
      $vtmax_apply_rules = new VTMAX_Apply_Rules;   
     
   /*  *********************************************************************************************************
@@ -125,7 +181,7 @@ class VTMAX_Parent_Cart_Validation {
             \n\t\t\t
             Maximum Purchase error found.<\/li>\n\t<\/ul>","refresh":"false"}     
       */
-      //  These are the incorrectly displayed contens of the 'add_error' function below, and are only a problem in this particular situation
+      //  These are the incorrectly displayed contens of the 'add_notice' function below, and are only a problem in this particular situation
       echo '<div class="woo-apply-checkout-cntl">';  // This 'echo' allows the incorrectly displayed error msg to fall within the 'woo-apply-checkout-cntl' div, and be deleted by following JS
       $woo_apply_checkout_cntl = 'yes';
       
@@ -135,9 +191,29 @@ class VTMAX_Parent_Cart_Validation {
       $vtmax_cart->error_messages_processed = 'yes';
       
       //tell WOO that an error has occurred, and not to proceed further
-      $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmax') );  //supplies an error msg and prevents payment from completing        //mwnt
-    } 
-    // else { $woocommerce->add_error(  __('FAKE Purchase error found.', 'vtmam') ); } //Test lifetime history max rule logic    
+      
+      //v1.07 changes begin
+        switch( $vtmax_cart->error_messages_are_custom ) {  
+          case 'all':
+               $this->vtmax_display_custom_messages();
+            break;
+          case 'some':    
+               $this->vtmax_display_custom_messages();
+               $this->vtmax_display_standard_messages();
+            break;           
+          default:  //'none' / no state set yet
+               $this->vtmax_display_standard_messages();
+              $current_version =  WOOCOMMERCE_VERSION;
+              if( (version_compare(strval('2.1.0'), strval($current_version), '>') == 1) ) {   //'==1' = 2nd value is lower     
+                $woocommerce->add_error(  __('Maximum Purchase error found.', 'vtmin') );  //supplies an error msg and prevents payment from completing 
+              } else {
+               //added in woo 2.1
+                wc_add_notice( __('Maximum Purchase error found.', 'vtmin'), $notice_type = 'error' );   //supplies an error msg and prevents payment from completing   v1.07
+              }                             
+            break;                    
+        }
+        //v1.07 end 
+     } //end-if
   }  
 
   
@@ -179,6 +255,7 @@ class VTMAX_Parent_Cart_Validation {
     //loop through all of the error messages 
     //          $vtmax_info['line_cnt'] is used when table formattted msgs come through.  Otherwise produces an inactive css id. 
     for($i=0; $i < sizeof($vtmax_cart->error_messages); $i++) { 
+       if ($vtmax_cart->error_messages[$i]['msg_is_custom'] != 'yes') {  //v1.07 ==>> don't show custom messages here...
      ?>
         <?php 
           //default selector for products area (".shop_table") is used on BOTH cart page and checkout page. Only use on cart page
@@ -193,6 +270,7 @@ class VTMAX_Parent_Cart_Validation {
            $('<div class="vtmax-error" id="line-cnt<?php echo $vtmax_info['line_cnt'] ?>"><h3 class="error-title">Maximum Purchase Error</h3><p> <?php echo $vtmax_cart->error_messages[$i]['msg_text'] ?> </p></div>').insertBefore('<?php echo $vtmax_setup_options['show_error_before_checkout_address_selector'] ?>');
     <?php 
           }
+       } //v1.07 end if
     }  //end 'for' loop      
      ?>   
             });   
@@ -216,23 +294,69 @@ class VTMAX_Parent_Cart_Validation {
      $vtmax_cart->error_messages_processed = 'no';   
  } 
  
-   
+   //v1.07 begin
   /* ************************************************
   **   Application - get current page url
+  *       
+  *       The code checking for 'www.' is included since
+  *       some server configurations do not respond with the
+  *       actual info, as to whether 'www.' is part of the 
+  *       URL.  The additional code balances out the currURL,
+  *       relative to the Parent Plugin's recorded URLs           
   *************************************************** */ 
  public  function vtmax_currPageURL() {
+     global $vtmax_info;
+     $currPageURL = $this->vtmax_get_currPageURL();
+     $www = 'www.';
+     
+     $curr_has_www = 'no';
+     if (strpos($currPageURL, $www )) {
+         $curr_has_www = 'yes';
+     }
+     
+     //use checkout URL as an example of all setup URLs
+     $checkout_has_www = 'no';
+     if (strpos($vtmax_info['woo_checkout_url'], $www )) {
+         $checkout_has_www = 'yes';
+     }     
+         
+     switch( true ) {
+        case ( ($curr_has_www == 'yes') && ($checkout_has_www == 'yes') ):
+        case ( ($curr_has_www == 'no')  && ($checkout_has_www == 'no') ): 
+            //all good, no action necessary
+          break;
+        case ( ($curr_has_www == 'no') && ($checkout_has_www == 'yes') ):
+            //reconstruct the URL with 'www.' included.
+            $currPageURL = $this->vtmax_get_currPageURL($www); 
+          break;
+        case ( ($curr_has_www == 'yes') && ($checkout_has_www == 'no') ): 
+            //all of the woo URLs have no 'www.', and curr has it, so remove the string 
+            $currPageURL = str_replace($www, "", $currPageURL);
+          break;
+     } 
+ 
+     return $currPageURL;
+  } 
+ public  function vtmax_get_currPageURL($www = null) {
+     global $vtmax_info;
      $pageURL = 'http';
-     if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
-        $pageURL .= "://";
+     //if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+     if ( isset( $_SERVER["HTTPS"] ) && strtolower( $_SERVER["HTTPS"] ) == "on" ) { $pageURL .= "s";}
+     $pageURL .= "://";
+     $pageURL .= $www;   //mostly null, only active rarely, 2nd time through - see above
+     
+     //NEVER create the URL with the port name!!!!!!!!!!!!!!
+     $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+     /* 
      if ($_SERVER["SERVER_PORT"] != "80") {
         $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
      } else {
         $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
      }
+     */
      return $pageURL;
-  } 
- 
-    
+  }  
+   //v1.07 end 
 
   /* ************************************************
   **   Application - On Error enqueue error style

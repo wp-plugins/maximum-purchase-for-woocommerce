@@ -51,7 +51,12 @@ class VTMAX_Rule {
      //*********************
      public  $maxRule_typeSelected;
      public  $maxRule_typeSelected_selection;  //cart or lifetime block...
-          
+     
+     //v1.07 begin
+     //custom messaging      
+     public  $custMsg_text;
+     //v1.07 end     
+         
      /*********************
      * error messages during admin rule creation - if error message, 
      *      overall rule status is pending, 
@@ -79,9 +84,9 @@ class VTMAX_Rule {
      public  $inpop_hist_total_price;
      public  $errProds_hist_qty;
      public  $errProds_hist_total_price;
-     public  $purch_hist_rule_row_id;   //mwnd
-     public  $purch_hist_rule_row_qty_total;  //mwnd
-     public  $purch_hist_rule_row_price_total; //mwnd
+     public  $purch_hist_rule_row_id;   
+     public  $purch_hist_rule_row_qty_total;  
+     public  $purch_hist_rule_row_price_total; 
      //******************************************
           
      //purchaser address debug info
@@ -265,7 +270,9 @@ class VTMAX_Rule {
         ) 
       );
      $this->maxRule_typeSelected_selection; //quantity or currency      
-      
+          
+     $this->custMsg_text; //v1.07 
+            
      /* ************************************************* */
      /* ************************************************* */
      /* Rule Processing at Purchase

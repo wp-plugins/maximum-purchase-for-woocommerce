@@ -38,6 +38,22 @@ function vtmax_add_admin_menu_setup_items() {
     		array( &$this, 'vtmax_pro_upgrade_cntl' ) 				// The callback function used to render the options for this submenu item
     	);
   } 
+
+
+  //v1.07 begin
+  //Add a DUPLICATE custom tax URL to be in the main Pricing Deals menu as well as in the PRODUCT menu
+  //post_type=product => PARENT plugin post_type
+    add_submenu_page(
+		'edit.php?post_type=vtmax-rule',	// The ID of the top-level menu page to which this submenu item belongs
+		__( 'Maximum Purchase Categories', 'vtmax' ), // The value used to populate the browser's title bar when the menu page is active                           
+		__( 'Maximum Purchase Categories', 'vtmax' ),					// The label of this submenu item displayed in the menu
+		'administrator',					// What roles are able to access this submenu item
+		'edit-tags.php?taxonomy=vtmax_rule_category&post_type=product',	// The slug used to represent this submenu item
+    //                                          PARENT PLUGIN POST TYPE      
+		''  				// NO CALLBACK FUNCTION REQUIRED
+	);
+  //v1.07 end  
+    
   
 } 
 
@@ -498,7 +514,7 @@ function vtmax_initialize_options() {
 		'vtmax_setup_options_page'		// Page on which to add this section of options
 	);
 	
-   
+  /* v1.07 
     add_settings_field(	         //opt6
 		'use_this_currency_sign',						// ID used to identify the field throughout the theme
 		__( 'Select a Currency Sign', 'vtmax' ),			// The label to the left of the option interface element
@@ -509,7 +525,7 @@ function vtmax_initialize_options() {
 			__( 'Select a Currency Sign.', 'vtmax' )
 		)
 	);    
-  
+ */ 
     add_settings_field(	        //opt7
 		'apply_multiple_rules_to_product',						// ID used to identify the field throughout the theme
 		__( 'Apply More Than 1 Rule to Each Product', 'vtmax' ),			// The label to the left of the option interface element
@@ -848,7 +864,7 @@ function vtmax_error_in_table_format_callback() {   //opt1
   
 	echo $html;
 }
-
+/* v1.07
 function vtmax_currency_sign_callback() {    //opt6
   $options = get_option( 'vtmax_setup_options' );
   $html = '<select id="currency_sign" name="vtmax_setup_options[use_this_currency_sign]">';
@@ -885,7 +901,7 @@ function vtmax_currency_sign_callback() {    //opt6
   
 	echo $html;
 }
-
+*/
 function vtmax_custom_error_msg_css_at_checkout_callback() {    //opt9
   $options = get_option( 'vtmax_setup_options' );
   $html = '<textarea type="text" id="custom_error_msg_css_at_checkout"  rows="200" cols="40" name="vtmax_setup_options[custom_error_msg_css_at_checkout]">' . $options['custom_error_msg_css_at_checkout'] . '</textarea>';

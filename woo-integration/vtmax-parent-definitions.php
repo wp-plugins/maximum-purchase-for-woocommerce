@@ -23,9 +23,11 @@ class VTMAX_Parent_Definitions {
     //html default selector locations in checkout where error message will display before.
     define('VTMAX_CHECKOUT_PRODUCTS_SELECTOR_BY_PARENT',    '.shop_table');        // PRODUCTS TABLE on BOTH cart page and checkout page
     define('VTMAX_CHECKOUT_ADDRESS_SELECTOR_BY_PARENT',     '#customer_details');      //  address area on checkout page    default = on
+        
+    error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING ^ E_DEPRECATED ); // v1.07
 
-
-    global $vtmax_info;      
+    global $vtmax_info;
+    $default_full_msg   =  __('Enter Custom Message (optional)', 'vtmin');   //v1.07          
     $vtmax_info = array(                                                                    
       	'parent_plugin' => 'woo',
       	'parent_plugin_taxonomy' => 'product_cat',
@@ -34,6 +36,7 @@ class VTMAX_Parent_Definitions {
         'applies_to_post_types' => 'product', //rule cat only needs to be registered to product, not rule as well...
         'rulecat_taxonomy' => 'vtmax_rule_category',
         'rulecat_taxonomy_name' => 'Maximum Purchase Rules',
+        
         
         /* *************************************************** */
         /*
@@ -66,7 +69,8 @@ class VTMAX_Parent_Definitions {
         'purch_hist_product_price_total'  => '',      
         'purch_hist_product_qty_total'  => '',          
         'get_purchaser_info' => '',          
-        'purch_hist_done' => ''          
+        'purch_hist_done' => '',
+        'default_full_msg'  => $default_full_msg //v1.07          
       );
 
 	}
