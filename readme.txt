@@ -4,7 +4,7 @@ Donate link: http://www.varktech.com/woocommerce/maximum-purchase-for-woocommerc
 Tags: e-commerce, WooCommerce, shop, store, admin, price, pricing, maximum, purchase, limits, checkout
 Requires at least: 3.3
 Tested up to: 3.9.1
-Stable tag: 1.07
+Stable tag: 1.07.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -147,13 +147,17 @@ Please review the following printed and video documentation.
 
 == Changelog ==
 
+= 1.07.1 - 2014-05-23 =
+* Enhancement - Update Nag additional message.
+
 = 1.07 - 2014-05-16 =
 * Fix - change add_error to add_notice.
 * Enhancement - Custom Messaging! Overrides default messaging for rule.
 * Fix - New rule add - stutter removed
 * Enhancement - change currency sign and currency formatting to follow parent plugin, removed setting from this plugin
 * Fix - Https issue resolved
-* Fix - Warnings damped  
+* Fix - Warnings damped 
+* Enhancement - Pro version check from Free version 
 
 = 1.06 - 2013-02-23 =
 * Bug Fix - "unexpected T_CLASS/T_PUBLIC" - File admin/vtmXX-rules-ui.php was corrupted, but the corruption only showed up on some hosts (?!).  Huge thanks to Don for allowing full access to his installation to debug.   
@@ -168,13 +172,17 @@ Please review the following printed and video documentation.
 
 == Upgrade Notice ==
 
+= 1.07.1 - 2014-05-23 =
+* Enhancement - Update Nag additional message.
+
 = 1.07 - 2014-05-16 =
 * Fix - change add_error to add_notice.
 * Enhancement - Custom Messaging! Overrides default messaging for rule.
 * Fix - New rule add - stutter removed
 * Enhancement - change currency sign and currency formatting to follow parent plugin, removed setting from this plugin
 * Fix - Https issue resolved
-* Fix - Warnings damped  
+* Fix - Warnings damped 
+* Enhancement - Pro version check from Free version 
 
 = 1.0 - 2013-01-15 =
 * Initial Public Release

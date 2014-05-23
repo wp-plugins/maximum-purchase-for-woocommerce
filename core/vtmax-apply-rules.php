@@ -285,10 +285,14 @@ class VTMAX_Apply_Rules{
     }
     
     if ( $vtmax_setup_options['debugging_mode_on'] == 'yes' ) {
-      echo '<pre>'.print_r($vtmax_rules_set, true).'</pre>' ; 
-      echo '<pre>'.print_r($vtmax_cart, true).'</pre>' ;
-      echo '<pre>'.print_r($vtmax_setup_options, true).'</pre>' ;
-      echo '<pre>'.print_r($vtmax_info, true).'</pre>' ; 
+      error_log( print_r(  '$vtmax_info', true ) );
+      error_log( var_export($vtmax_info, true ) );
+      error_log( print_r(  '$vtmax_rules_set', true ) );
+      error_log( var_export($vtmax_rules_set, true ) );
+      error_log( print_r(  '$vtmax_cart', true ) );
+      error_log( var_export($vtmax_cart, true ) );
+      error_log( print_r(  '$vtmax_setup_options', true ) );
+      error_log( var_export($vtmax_setup_options, true ) );  
     }
     
   }  //end vtmax_maximum_purchase_check
@@ -831,7 +835,7 @@ class VTMAX_Apply_Rules{
         $this->vtmax_set_custom_msgs_status ('standardMsg');     //v1.07  
              
       }  //end text message formatting
-    
+      /*
       if ( $vtmax_setup_options['debugging_mode_on'] == 'yes' ){   
         echo '$message'; echo '<pre>'.print_r($message, true).'</pre>' ;
         echo '$vtmax_rules_set[$i]->errProds_qty = '; echo '<pre>'.print_r($vtmax_rules_set[$i]->errProds_qty, true).'</pre>' ;
@@ -839,7 +843,7 @@ class VTMAX_Apply_Rules{
         echo '$vtmax_rules_set[$i]->errProds_names = '; echo '<pre>'.print_r($vtmax_rules_set[$i]->errProds_names, true).'</pre>' ;
         echo '$vtmax_rules_set[$i]->errProds_cat_names = '; echo '<pre>'.print_r($vtmax_rules_set[$i]->errProds_cat_names, true).'</pre>' ;   
       } 
-
+      */
      
   } 
       
@@ -896,12 +900,14 @@ class VTMAX_Apply_Rules{
     	global $vtmax_cart, $vtmax_rules_set, $vtmax_rule, $vtmax_info, $vtmax_setup_options;     
       if ( sizeof($vtmax_rules_set[$i]->role_in_checked) > 0 ) {
             if (in_array($this->vtmax_get_current_user_role(), $vtmax_rules_set[$i]->role_in_checked )) {   //if role is in previously checked_list
+                  /*
                   if ( $vtmax_setup_options['debugging_mode_on'] == 'yes' ){ 
                     echo 'current user role= <pre>'.print_r($this->vtmax_get_current_user_role(), true).'</pre>' ;
                     echo 'rule id= <pre>'.print_r($vtmax_rules_set[$i]->post_id, true).'</pre>' ;  
                     echo 'role_in_checked= <pre>'.print_r($vtmax_rules_set[$i]->role_in_checked, true).'</pre>' ; 
                     echo 'i= '.$i . '<br>'; echo 'k= '.$k . '<br>';
                   }
+                  */
               return true;                                
             } 
       } 
