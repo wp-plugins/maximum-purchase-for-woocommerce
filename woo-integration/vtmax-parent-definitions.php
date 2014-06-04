@@ -70,6 +70,7 @@ class VTMAX_Parent_Definitions {
         'purch_hist_product_qty_total'  => '',          
         'get_purchaser_info' => '',          
         'purch_hist_done' => '',
+        'purchaser_ip_address' => esc_sql($_SERVER['REMOTE_ADDR']), // v1.07.2
         'default_full_msg'  => $default_full_msg //v1.07          
       );
 

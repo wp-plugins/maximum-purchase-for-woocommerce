@@ -35,7 +35,10 @@ class VTMAX_Parent_Cart_Validation {
     add_action( 'woocommerce_before_checkout_process', array(&$this, 'vtmax_woo_place_order_cntl') );   
     
     //save info to Lifetime tables following purchase       
-    add_action('woocommerce_checkout_order_processed', array( &$this, 'vtmax_post_purchase_save_info' ));
+
+     add_action('woocommerce_checkout_order_processed', array( &$this, 'vtmax_pre_purchase_save_session' ) );  // v1.07.2
+     add_action('woocommerce_thankyou',                 array( &$this, 'vtmax_post_purchase_save_info' ) );    // v1.07.2  
+
     /*  =============+ */      
                                                                                 
 	}
@@ -367,17 +370,68 @@ class VTMAX_Parent_Cart_Validation {
   } 
  
  
+  // v1.07.2 begin
+  /* ************************************************
+  **   before purchase, save info to session
+  *************************************************** */ 
+  function vtmax_pre_purchase_save_session() { 
+    global $post, $wpdb, $vtmax_setup_options, $vtmax_cart, $vtmax_rules_set, $vtmax_rule, $vtmax_info;
+              
+      if(!isset($_SESSION)){
+        session_start();
+        header("Cache-Control: no-cache");
+        header("Pragma: no-cache");
+      } 
+      $data_chain = array();
+      $data_chain[] = $vtmax_rules_set;
+      $data_chain[] = $vtmax_cart;
+      $data_chain[] = $vtmax_info;
+      $_SESSION['data_chain'] = serialize($data_chain);  
+    
+    return; 
+    
+  } 
+  // v1.07.2 end
   
   /* ************************************************
   **   After purchase, store max purchase info for lifetime rules on db
   *************************************************** */ 
-  function vtmax_post_purchase_save_info () {
-    
+  function vtmax_post_purchase_save_info() { 
+          
     if(defined('VTMAX_PRO_DIRNAME')) {
       require ( VTMAX_PRO_DIRNAME . '/woo-integration/vtmax-save-purchase-info.php');
     }
     
+    return; 
+    
   } // end  function vtmax_store_max_purchaser_info() 
  
+ 
+   // v1.07.2 begin
+   function vtmax_get_data_chain() {
+         
+      if(!isset($_SESSION)){
+        session_start();
+        header("Cache-Control: no-cache");
+        header("Pragma: no-cache");
+      }   
+      global $vtmax_rules_set, $vtmax_cart, $vtmax_info;
+      
+      if (isset($_SESSION['data_chain'])) {
+        $data_chain      = unserialize($_SESSION['data_chain']);
+      } else {
+        $data_chain = array();
+      }
+         
+      if ($vtmax_rules_set == '') {        
+        $vtmax_rules_set = $data_chain[0];
+        $vtmax_cart      = $data_chain[1];
+        $vtmax_info      = $data_chain[2];
+      }
+
+      return $data_chain;
+   }
+   // v1.07.2  end
+   
 } //end class
 $vtmax_parent_cart_validation = new VTMAX_Parent_Cart_Validation;

@@ -56,6 +56,8 @@ Parent Plugin Integration
         
               //add cart_item to cart array
               $vtmax_cart->cart_items[]       = $vtmax_cart_item;
+
+              $vtmax_cart->purchaser_ip_address = $vtmax_info['purchaser_ip_address']; // v1.07.2
 				    }
         } //	endforeach;
         
