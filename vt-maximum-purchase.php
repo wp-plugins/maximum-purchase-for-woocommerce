@@ -19,7 +19,10 @@ Author URI: http://varktech.com
    $vtmax_cart_item;
    $vtmax_setup_options;
 //   $vtmax_error_msg;
-     
+   
+   //initial setup only, overriden later in function vtprd_debug_options
+   error_reporting(E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR); //v1.07.2
+              
 class VTMAX_Controller{
 	
 	public function __construct(){    
