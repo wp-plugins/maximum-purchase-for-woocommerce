@@ -4,7 +4,7 @@ Donate link: http://www.varktech.com/woocommerce/maximum-purchase-for-woocommerc
 Tags: e-commerce, WooCommerce, shop, store, admin, price, pricing, maximum, purchase, limits, checkout
 Requires at least: 3.3
 Tested up to: 4.1
-Stable tag: 1.07.2
+Stable tag: 1.07.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,7 +18,7 @@ The Maximum Purchase plugin for WooCommerce gives you the ability to set up maxi
 
 If a purchase in your store fails a maximum purchase rule, an error message appears at the top of the checkout page, identifying the error situation and rule requirements.  The customer must resolve the error, before the purchase can be completed.   
 
-Fully tested with WooCommerce 2.2+ .
+Fully tested with WooCommerce 2.3+ .
 
 
 = Now with Custom Messaging! =
@@ -152,6 +152,10 @@ Please review the following printed and video documentation.
 
 == Changelog ==
 
+= 1.07.3 - 2014-12-28 =
+* Fix - added 'doing ajax' to lifetime
+* Fix - pull displayed unit cost from cart price rather than db
+
 = 1.07.2 - 2014-06-04 =
 * Fix - post-purchase processing
 
@@ -179,6 +183,10 @@ Please review the following printed and video documentation.
 * Initial Public Release
 
 == Upgrade Notice ==
+
+= 1.07.3 - 2014-12-28 =
+* Fix - added 'doing ajax' to lifetime
+* Fix - pull displayed unit cost from cart price rather than db
 
 = 1.07.2 - 2014-06-04 =
 * Fix - post-purchase processing
