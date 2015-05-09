@@ -3,7 +3,7 @@
 Plugin Name: VarkTech Maximum Purchase for WooCommerce
 Plugin URI: http://varktech.com
 Description: An e-commerce add-on for WooCommerce, supplying maximum purchase functionality.
-Version: 1.07.3
+Version: 1.07.4
 Author: Vark
 Author URI: http://varktech.com
 */
@@ -27,9 +27,9 @@ class VTMAX_Controller{
 	
 	public function __construct(){    
    
-		define('VTMAX_VERSION',                               '1.07.3');
+		define('VTMAX_VERSION',                               '1.07.4');
     define('VTMAX_MINIMUM_PRO_VERSION',                   '1.07.3'); //V1.07.1
-    define('VTMAX_LAST_UPDATE_DATE',                      '2015-05-05');
+    define('VTMAX_LAST_UPDATE_DATE',                      '2015-05-09');
     define('VTMAX_DIRNAME',                               ( dirname( __FILE__ ) ));
     define('VTMAX_URL',                                   plugins_url( '', __FILE__ ) );
     define('VTMAX_EARLIEST_ALLOWED_WP_VERSION',           '3.3');   //To pick up wp_get_object_terms fix, which is required for vtmax-parent-functions.php

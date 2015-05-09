@@ -583,7 +583,7 @@ class VTMAX_Rules_UI {
               <span id='cust-msg-optional'>(optional)</span>
               <span class="clear-left" id='cust-msg-comment'>(overrides default message)</span>
            </span>   
-            <textarea name="cust-msg-text" type="text" class="msg-text newColumn2" id="cust-msg-text" cols="50" rows="2"><?php echo stripslashes($vtmax_rule->custMsg_text); ?></textarea>          
+            <textarea name="cust-msg-text" type="text" class="msg-text newColumn2" id="cust-msg-text" cols="50" rows="2"><?php echo stripslashes($vtmax_rule->custMsg_text); //v1.07.4  ?></textarea>          
        </div>
 
       <?php

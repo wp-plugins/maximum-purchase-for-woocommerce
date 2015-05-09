@@ -480,11 +480,19 @@ class VTMAX_Parent_Cart_Validation {
         $data_chain = array();
       }
          
+      //v1.07.4 begin
+      /*  REMOVED - do data chain moves ALWAYS
       if ($vtmax_rules_set == '') {        
         $vtmax_rules_set = $data_chain[0];
         $vtmax_cart      = $data_chain[1];
         $vtmax_info      = $data_chain[2];
       }
+      */  
+      $vtmax_rules_set = $data_chain[0];
+      $vtmax_cart      = $data_chain[1];
+      $vtmax_info      = $data_chain[2];
+      //v1.07.4 end
+      
 
       return $data_chain;
    }
